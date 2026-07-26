@@ -16,3 +16,8 @@ yarn-error.log
 .release-env
 .docker-creds
 xbvr.exe
+
+.agent/
+.agents/
+.opencode/
+_bmad/

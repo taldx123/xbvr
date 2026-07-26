@@ -12,6 +12,7 @@ type SceneAlternateSource struct {
 	MatchAchieved int    `json:"MatchAchieved"`
 	Query         string `json:"query"` // ******* remove before go live, just to help testing query used for the scene
 	Scene         Scene  `json:"scene"`
+	Timestamps    string `json:"timestamps"`
 }
 type AltSrcMatchParams struct {
 	IgnoreReleasedBefore time.Time `json:"ignore_released_before"` // optionally don't check the released date, if before a certain date, this may be useful to only search on release dates after an inital load of scene on a site
