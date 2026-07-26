@@ -1,7 +1,6 @@
 package tasks
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -66,42 +65,74 @@ func RescanVolumes(id int) {
 
 		// Match Scene to File
 		var files []models.File
-		var scenes []models.Scene
-		var extrefs []models.ExternalReference
 
 		tlog.Infof("Matching Scenes to known filenames")
+		matchStart := time.Now()
 		db.Model(&models.File{}).Where("files.scene_id = 0").Find(&files)
+		tlog.Debugf("Fetched %d unmatched files in %s", len(files), time.Since(matchStart))
 
 		escape := func(s string) string {
-			var buffer bytes.Buffer
-			json.HTMLEscape(&buffer, []byte(s))
-			return buffer.String()
+			b, _ := json.Marshal(s)
+			return string(b)
+		}
+
+		var unmatchedFiles []int
+		var timeRegexMatch time.Duration
+		var timeAltSrcMatch time.Duration
+
+		var allScenes []models.Scene
+		db.Select("id, filenames_arr").Find(&allScenes)
+
+		var allExtRefs []models.ExternalReference
+		if config.Config.Advanced.UseAltSrcInFileMatching {
+			db.Preload("XbvrLinks").Where("external_source like 'alternate scene %'").Find(&allExtRefs)
 		}
 
 		for i := range files {
+			var scenes []models.Scene
 			unescapedFilename := path.Base(files[i].Filename)
 			filename := escape(unescapedFilename)
 			filename2 := strings.Replace(filename, ".funscript", ".mp4", -1)
 			filename3 := strings.Replace(filename, ".hsp", ".mp4", -1)
 			filename4 := strings.Replace(filename, ".srt", ".mp4", -1)
 			filename5 := strings.Replace(filename, ".cmscript", ".mp4", -1)
-			err := db.Where("filenames_arr LIKE ? OR filenames_arr LIKE ? OR filenames_arr LIKE ? OR filenames_arr LIKE ? OR filenames_arr LIKE ?", `%"`+filename+`"%`, `%"`+filename2+`"%`, `%"`+filename3+`"%`, `%"`+filename4+`"%`, `%"`+filename5+`"%`).Find(&scenes).Error
-			if err != nil {
-				log.Error(err, " when matching "+unescapedFilename)
+			
+			stepStart := time.Now()
+			for _, s := range allScenes {
+				if strings.Contains(strings.ToLower(s.FilenamesArr), strings.ToLower(filename)) ||
+					strings.Contains(strings.ToLower(s.FilenamesArr), strings.ToLower(filename2)) ||
+					strings.Contains(strings.ToLower(s.FilenamesArr), strings.ToLower(filename3)) ||
+					strings.Contains(strings.ToLower(s.FilenamesArr), strings.ToLower(filename4)) ||
+					strings.Contains(strings.ToLower(s.FilenamesArr), strings.ToLower(filename5)) {
+					var fullScene models.Scene
+					db.First(&fullScene, s.ID)
+					scenes = append(scenes, fullScene)
+				}
 			}
-			if len(scenes) == 0 && config.Config.Advanced.UseAltSrcInFileMatching {
-				// check if the filename matches in external_reference record
+			timeRegexMatch += time.Since(stepStart)
 
-				db.Preload("XbvrLinks").Where("external_source like 'alternate scene %' and external_data LIKE ? OR external_data LIKE ? OR external_data LIKE ? OR external_data LIKE ? OR external_data LIKE ?", `%"`+filename+`%`, `%"`+filename2+`%`, `%"`+filename3+`%`, `%"`+filename4+`%`, `%"`+filename5+`%`).Find(&extrefs)
-				if len(extrefs) == 1 {
-					if len(extrefs[0].XbvrLinks) == 1 {
-						// the scene id will be the Internal DB Id from the associated link
+			if len(scenes) == 0 && config.Config.Advanced.UseAltSrcInFileMatching {
+				stepStart = time.Now()
+				
+				var matchedExtRefs []models.ExternalReference
+				for _, ext := range allExtRefs {
+					if strings.Contains(strings.ToLower(ext.ExternalData), strings.ToLower(filename)) ||
+						strings.Contains(strings.ToLower(ext.ExternalData), strings.ToLower(filename2)) ||
+						strings.Contains(strings.ToLower(ext.ExternalData), strings.ToLower(filename3)) ||
+						strings.Contains(strings.ToLower(ext.ExternalData), strings.ToLower(filename4)) ||
+						strings.Contains(strings.ToLower(ext.ExternalData), strings.ToLower(filename5)) {
+						matchedExtRefs = append(matchedExtRefs, ext)
+					}
+				}
+
+				if len(matchedExtRefs) == 1 {
+					if len(matchedExtRefs[0].XbvrLinks) == 1 {
 						var scene models.Scene
-						scene.GetIfExistByPK(extrefs[0].XbvrLinks[0].InternalDbId)
-						// Add File to the list of Scene filenames
+						scene.GetIfExistByPK(matchedExtRefs[0].XbvrLinks[0].InternalDbId)
 						var pfTxt []string
-						err = json.Unmarshal([]byte(scene.FilenamesArr), &pfTxt)
+						err := json.Unmarshal([]byte(scene.FilenamesArr), &pfTxt)
 						if err != nil {
+							timeAltSrcMatch += time.Since(stepStart)
 							continue
 						}
 						pfTxt = append(pfTxt, files[i].Filename)
@@ -113,60 +144,83 @@ func RescanVolumes(id int) {
 						scenes = append(scenes, scene)
 					}
 				}
+				timeAltSrcMatch += time.Since(stepStart)
 			}
+			
 			if len(scenes) == 1 {
 				files[i].SceneID = scenes[0].ID
 				files[i].Save()
 				scenes[0].UpdateStatus()
+				tlog.Infof("File %s matched with scene %s", files[i].Filename, scenes[0].SceneID)
 			} else {
-				if config.Config.Storage.MatchOhash && config.Config.Advanced.StashApiKey != "" {
-					hash := files[i].OsHash
-					if len(hash) < 16 {
-						// the has in xbvr is sometiomes < 16 pad with zeros
-						paddingLength := 16 - len(hash)
-						hash = strings.Repeat("0", paddingLength) + hash
-					}
-					queryVariable := `
-				{"input":{
-					"fingerprints": {					
-						"value": "` + hash + `",
-						"modifier": "INCLUDES"
-					},				
-					"page": 1
+				unmatchedFiles = append(unmatchedFiles, i)
+			}
+
+			if (i % 50) == 0 {
+				tlog.Infof("Matching Scenes to known filenames (%v/%v)", i+1, len(files))
+			}
+		}
+		tlog.Debugf("Completed filename matching. filenames_arr matching took %s, alternate source matching took %s", timeRegexMatch, timeAltSrcMatch)
+
+		if config.Config.Storage.MatchOhash && config.Config.Advanced.StashApiKey != "" {
+			tlog.Infof("Querying StashDB for unmatched hashes...")
+			stashDbStart := time.Now()
+			batchSize := 50
+			for batchStart := 0; batchStart < len(unmatchedFiles); batchStart += batchSize {
+				batchEnd := batchStart + batchSize
+				if batchEnd > len(unmatchedFiles) {
+					batchEnd = len(unmatchedFiles)
 				}
-				}`
-					// call Stashdb graphql searching for os_hash
-					stashMatches := scrape.GetScenePage(queryVariable)
-					for _, match := range stashMatches.Data.QueryScenes.Scenes {
-						if match.ID != "" {
+				
+				var hashes []string
+				var batchFileIndices []int
+				for _, idx := range unmatchedFiles[batchStart:batchEnd] {
+					hash := files[idx].OsHash
+					if len(hash) > 0 {
+						if len(hash) < 16 {
+							paddingLength := 16 - len(hash)
+							hash = strings.Repeat("0", paddingLength) + hash
+						}
+						hashes = append(hashes, hash)
+						batchFileIndices = append(batchFileIndices, idx)
+					}
+				}
+
+				if len(hashes) > 0 {
+					matchResults := scrape.GetSceneIdsByHashes(hashes)
+
+					for _, idx := range batchFileIndices {
+						hash := files[idx].OsHash
+						if len(hash) < 16 {
+							paddingLength := 16 - len(hash)
+							hash = strings.Repeat("0", paddingLength) + hash
+						}
+						
+						if matchID, ok := matchResults[hash]; ok && matchID != "" {
 							var externalRefLink models.ExternalReferenceLink
-							db.Where(&models.ExternalReferenceLink{ExternalSource: "stashdb scene", ExternalId: match.ID}).First(&externalRefLink)
+							db.Where(&models.ExternalReferenceLink{ExternalSource: "stashdb scene", ExternalId: matchID}).First(&externalRefLink)
 							if externalRefLink.ID != 0 {
-								files[i].SceneID = externalRefLink.InternalDbId
-								files[i].Save()
+								files[idx].SceneID = externalRefLink.InternalDbId
+								files[idx].Save()
 								var scene models.Scene
 								scene.GetIfExistByPK(externalRefLink.InternalDbId)
 
-								// add filename tyo the array
 								var pfTxt []string
 								json.Unmarshal([]byte(scene.FilenamesArr), &pfTxt)
-								pfTxt = append(pfTxt, files[i].Filename)
+								pfTxt = append(pfTxt, files[idx].Filename)
 								tmp, _ := json.Marshal(pfTxt)
 								scene.FilenamesArr = string(tmp)
 								scene.Save()
 								models.AddAction(scene.SceneID, "match", "filenames_arr", scene.FilenamesArr)
 
 								scene.UpdateStatus()
-								log.Infof("File %s matched to Scene %s matched using stashdb hash %s", path.Base(files[i].Filename), scene.SceneID, hash)
+								log.Infof("File %s matched to Scene %s matched using stashdb hash %s", path.Base(files[idx].Filename), scene.SceneID, hash)
 							}
 						}
 					}
 				}
 			}
-
-			if (i % 50) == 0 {
-				tlog.Infof("Matching Scenes to known filenames (%v/%v)", i+1, len(files))
-			}
+			tlog.Debugf("Completed StashDB matching in %s", time.Since(stashDbStart))
 		}
 
 		tlog.Infof("Generating heatmaps")

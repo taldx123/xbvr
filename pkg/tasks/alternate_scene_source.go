@@ -34,6 +34,7 @@ func AddAlternateSceneSource(db *gorm.DB, scrapedScene models.ScrapedScene) {
 	data.MasterSiteId = scrapedScene.MasterSiteId
 	data.Scene = scene
 	data.MatchAchieved = -1
+	data.Timestamps = scrapedScene.Timestamps
 	jsonData, _ := json.Marshal(data)
 	extref.ExternalData = string(jsonData)
 	extref.UdfBool1 = scene.HumanScript
@@ -123,6 +124,7 @@ func MatchAlternateSources() {
 			if !found {
 				UpdateLinks(commonDb, altsource.ID, models.ExternalReferenceLink{InternalTable: "scenes", InternalDbId: possiblematchs[0].ID, InternalNameId: possiblematchs[0].SceneID,
 					ExternalReferenceID: altsource.ID, ExternalSource: altsource.ExternalSource, ExternalId: altsource.ExternalId, MatchType: 10000, UdfDatetime1: time.Now()})
+				models.ProcessTimestamps(commonDb, possiblematchs[0].ID, unmatchedSceneData.Timestamps)
 			}
 		} else {
 			// build the search query based on the sites matching params
@@ -250,6 +252,7 @@ func MatchAlternateSources() {
 					if !found {
 						UpdateLinks(commonDb, altsource.ID, models.ExternalReferenceLink{InternalTable: "scenes", InternalDbId: scene.ID, InternalNameId: scene.SceneID,
 							ExternalReferenceID: altsource.ID, ExternalSource: altsource.ExternalSource, ExternalId: altsource.ExternalId, MatchType: int(searchResults.Hits[0].Score), UdfDatetime1: time.Now()})
+						models.ProcessTimestamps(commonDb, scene.ID, unmatchedSceneData.Timestamps)
 					}
 				}
 			}

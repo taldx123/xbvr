@@ -825,6 +825,47 @@ func GetStashPerformerFull(performer string) FindPerformerScenesResult {
 	return data
 }
 
+func GetSceneIdsByHashes(hashes []string) map[string]string {
+	if len(hashes) == 0 {
+		return nil
+	}
+
+	var queryBuilder strings.Builder
+	queryBuilder.WriteString("query batchFingerprints {")
+	for i, hash := range hashes {
+		queryBuilder.WriteString(fmt.Sprintf(`
+			h%d: queryScenes(input: { fingerprints: { modifier: INCLUDES, value: "%s" }, page: 1 }) {
+				scenes { id }
+			}
+		`, i, hash))
+	}
+	queryBuilder.WriteString("}")
+
+	query := queryBuilder.String()
+	resp := CallStashDb(query, "{}")
+
+	var data struct {
+		Data map[string]struct {
+			Scenes []struct {
+				ID string `json:"id"`
+			} `json:"scenes"`
+		} `json:"data"`
+	}
+
+	json.Unmarshal(resp, &data)
+
+	result := make(map[string]string)
+	for i, hash := range hashes {
+		alias := fmt.Sprintf("h%d", i)
+		if queryResult, ok := data.Data[alias]; ok {
+			if len(queryResult.Scenes) > 0 {
+				result[hash] = queryResult.Scenes[0].ID
+			}
+		}
+	}
+	return result
+}
+
 func CallStashDb(query string, rawVariables string) []byte {
 	var variables map[string]interface{}
 	json.Unmarshal([]byte(rawVariables), &variables)

@@ -10,10 +10,7 @@ import (
 //go:embed dist
 var Assets embed.FS
 
-func GetFileSystem(useOS bool) http.FileSystem {
-	if useOS {
-		return http.Dir("ui/dist")
-	}
+func GetFileSystem() http.FileSystem {
 
 	fs, err := fs.Sub(Assets, "dist")
 	if err != nil {
