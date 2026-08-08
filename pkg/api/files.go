@@ -15,6 +15,7 @@ import (
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
 	"github.com/emicklei/go-restful/v3"
 	"github.com/markphelps/optional"
+	"github.com/xbapps/xbvr/pkg/config"
 	"github.com/xbapps/xbvr/pkg/models"
 )
 
@@ -24,6 +25,10 @@ type RequestMatchFile struct {
 }
 
 type RequestUnmatchFile struct {
+	FileID uint `json:"file_id"`
+}
+
+type RequestToggleAlpha struct {
 	FileID uint `json:"file_id"`
 }
 
@@ -57,6 +62,9 @@ func (i FilesResource) WebService() *restful.WebService {
 	ws.Route(ws.POST("/unmatch").To(i.unmatchFile).
 		Metadata(restfulspec.KeyOpenAPITags, tags))
 
+	ws.Route(ws.POST("/toggle-alpha").To(i.toggleAlpha).
+		Metadata(restfulspec.KeyOpenAPITags, tags))
+
 	ws.Route(ws.GET("/file/{file-id}").To(i.getFile).
 		Param(ws.PathParameter("file-id", "File ID").DataType("int")).
 		Metadata(restfulspec.KeyOpenAPITags, tags).
@@ -80,6 +88,51 @@ func (i FilesResource) getFile(req *restful.Request, resp *restful.Response) {
 	_ = file.GetIfExistByPK(uint(id))
 
 	resp.WriteHeaderAndEntity(http.StatusOK, file)
+}
+
+func (i FilesResource) toggleAlpha(req *restful.Request, resp *restful.Response) {
+	db, _ := models.GetDB()
+	defer db.Close()
+
+	var r RequestToggleAlpha
+	err := req.ReadEntity(&r)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
+	var file models.File
+	err = db.First(&file, r.FileID).Error
+	if err == nil {
+		file.IsExternalAlpha = !file.IsExternalAlpha
+		file.Save()
+		
+		if file.IsExternalAlpha && file.SceneID != 0 {
+			var scene models.Scene
+			if db.Preload("Files").First(&scene, file.SceneID).Error == nil {
+				videoFiles, _ := scene.GetVideoFilesSorted(config.Config.Interfaces.Players.VideoSortSeq)
+				for _, f := range videoFiles {
+					if !f.IsExternalAlpha && f.ID != file.ID {
+						f.ExternalAlphaID = file.ID
+						f.Save()
+						break
+					}
+				}
+			}
+		} else if !file.IsExternalAlpha && file.SceneID != 0 {
+			var scene models.Scene
+			if db.Preload("Files").First(&scene, file.SceneID).Error == nil {
+				videoFiles, _ := scene.GetVideoFilesSorted(config.Config.Interfaces.Players.VideoSortSeq)
+				for _, f := range videoFiles {
+					if f.ExternalAlphaID == file.ID {
+						f.ExternalAlphaID = 0
+						f.Save()
+					}
+				}
+			}
+		}
+	}
+	resp.WriteHeaderAndEntity(http.StatusOK, map[string]string{"status": "ok"})
 }
 
 func (i FilesResource) listFiles(req *restful.Request, resp *restful.Response) {
@@ -240,7 +293,21 @@ func (i FilesResource) matchFile(req *restful.Request, resp *restful.Response) {
 	err = db.Preload("Volume").Where(&models.File{ID: r.FileID}).First(&f).Error
 	if err == nil {
 		f.SceneID = scene.ID
+		if strings.Contains(f.Filename, "_XALPHA") {
+			f.IsExternalAlpha = true
+		}
 		f.Save()
+
+		if f.IsExternalAlpha {
+			videoFiles, _ := scene.GetVideoFilesSorted(config.Config.Interfaces.Players.VideoSortSeq)
+			for _, vf := range videoFiles {
+				if !vf.IsExternalAlpha && vf.ID != f.ID {
+					vf.ExternalAlphaID = f.ID
+					vf.Save()
+					break
+				}
+			}
+		}
 	}
 
 	// Add File to the list of Scene filenames so it will be discovered when file is moved

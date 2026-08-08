@@ -401,6 +401,32 @@ func scanLocalVolume(vol models.Volume, db *gorm.DB, tlog *logrus.Entry) {
 			tlog.Infof("Scanning %v (%v/%v)", vol.Path, j+1, len(videoProcList))
 		}
 
+		// Auto-match external alpha files that are currently unmatched
+		var alphaFiles []models.File
+		db.Where("filename LIKE ? AND scene_id = 0", "%_XALPHA%").Find(&alphaFiles)
+		for _, alphaFile := range alphaFiles {
+			// Find the corresponding parent file
+			parentFilename := strings.Replace(alphaFile.Filename, "_XALPHA", "", 1)
+			
+			var parentFile models.File
+			if db.Where(&models.File{Path: alphaFile.Path, Filename: parentFilename}).First(&parentFile).Error == nil {
+				if parentFile.SceneID != 0 {
+					alphaFile.IsExternalAlpha = true
+					alphaFile.SceneID = parentFile.SceneID
+					alphaFile.Save()
+
+					parentFile.ExternalAlphaID = alphaFile.ID
+					parentFile.Save()
+
+					tlog.Infof("Auto-matched external alpha mask '%v' to parent video '%v'", alphaFile.Filename, parentFile.Filename)
+				} else {
+					tlog.Warnf("Found external alpha mask '%v' but parent video '%v' is not matched to a scene", alphaFile.Filename, parentFilename)
+				}
+			} else {
+				tlog.Warnf("Found external alpha mask '%v' but could not find parent video '%v'", alphaFile.Filename, parentFilename)
+			}
+		}
+
 		for _, path := range scriptProcList {
 			var fl models.File
 			db.Where(&models.File{
