@@ -38,6 +38,8 @@ type File struct {
 	VideoDuration        float64 `json:"duration" xbvrbackup:"duration"`
 	VideoProjection      string  `json:"projection" xbvrbackup:"projection"`
 	HasAlpha             bool    `json:"has_alpha" xbvrbackup:"has_alpha"`
+	IsExternalAlpha      bool    `json:"is_external_alpha" xbvrbackup:"is_external_alpha"`
+	ExternalAlphaID      uint    `json:"external_alpha_id" xbvrbackup:"external_alpha_id"`
 
 	HasHeatmap          bool `json:"has_heatmap" xbvrbackup:"-"`
 	IsSelectedScript    bool `json:"is_selected_script" xbvrbackup:"is_selected_script"`

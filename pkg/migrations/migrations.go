@@ -847,6 +847,16 @@ func Migrate(migrateTo string) {
 				return tx.AutoMigrate(File{}).Error
 			},
 		},
+		{
+			ID: "0088-add-external-alpha-id",
+			Migrate: func(tx *gorm.DB) error {
+				type File struct {
+					IsExternalAlpha bool
+					ExternalAlphaID uint
+				}
+				return tx.AutoMigrate(File{}).Error
+			},
+		},
 
 		// ===============================================================================================
 		// Put DB Schema migrations above this line and migrations that rely on the updated schema below

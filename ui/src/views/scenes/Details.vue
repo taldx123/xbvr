@@ -250,7 +250,7 @@
                         </button>
                       </div>
                       <div class="media-content" style="overflow-wrap: break-word;">
-                        <strong>{{ f.filename }}</strong><br/>
+                        <strong>{{ f.filename }}</strong>&nbsp;<b-tag v-if="f.is_external_alpha" type="is-primary" size="is-small" rounded>Alpha Mask</b-tag><br/>
                         <small>
                           <span class="pathDetails">{{ f.path }}</span>
                           <br/>
@@ -264,6 +264,9 @@
                         </div>
                       </div>
                       <div class="media-right">
+                        <button v-if="f.type === 'video'" class="button is-small is-outlined" :class="{'is-primary': f.is_external_alpha, 'is-dark': !f.is_external_alpha}" :title="f.is_external_alpha ? 'Remove as Alpha Mask' : 'Set as Alpha Mask'" @click='toggleAlphaMask(f)'>
+                          <b-icon pack="fas" icon="mask" size="is-small"></b-icon>
+                        </button>&nbsp;
                         <button class="button is-dark is-small is-outlined" title="Unmatch file from scene" @click='unmatchFile(f)'>
                           <b-icon pack="fas" icon="unlink" size="is-small"></b-icon>
                         </button>&nbsp;
@@ -832,6 +835,14 @@ watch:{
             this.$store.commit('overlay/showDetails', { scene: data })
           })
         }
+      })
+    },
+    toggleAlphaMask (file) {
+      file.is_external_alpha = !file.is_external_alpha;
+      ky.post(`/api/files/toggle-alpha`, {json:{file_id: file.id}}).json().then(data => {
+        this.$store.dispatch('sceneList/fetchSceneList')
+      }).catch(err => {
+        file.is_external_alpha = !file.is_external_alpha;
       })
     },
     removeFile (file) {

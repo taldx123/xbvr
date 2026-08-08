@@ -60,6 +60,7 @@ type HeresphereVideo struct {
 	Tags                 []HeresphereTag                `json:"tags,omitempty"`
 	Media                []HeresphereMedia              `json:"media"`
 	AlphaPackedSettings  *HereSphereAlphaPackedSettings `json:"alphaPackedSettings,omitempty"`
+	AlphaExternal        string                         `json:"alphaExternal,omitempty"`
 	WriteFavorite        bool                           `json:"writeFavorite"`
 	WriteRating          bool                           `json:"writeRating"`
 	WriteTags            bool                           `json:"writeTags"`
@@ -313,7 +314,21 @@ func (i HeresphereResource) getHeresphereScene(req *restful.Request, resp *restf
 	if len(videoFiles) == 0 {
 		ProcessHeresphereUpdates(&scene, requestData, models.File{})
 	} else {
+		var standardFiles []models.File
+		for _, f := range videoFiles {
+			if !f.IsExternalAlpha {
+				standardFiles = append(standardFiles, f)
+			}
+		}
+		if len(standardFiles) > 0 {
+			videoFiles = standardFiles
+		}
 		ProcessHeresphereUpdates(&scene, requestData, videoFiles[0])
+	}
+
+	alphaExternal := ""
+	if len(videoFiles) > 0 && videoFiles[0].ExternalAlphaID != 0 {
+		alphaExternal = fmt.Sprintf("%v://%v/api/dms/file/%v%v", getProto(req), req.Request.Host, videoFiles[0].ExternalAlphaID, dnt)
 	}
 
 	features := make(map[string]bool, 30)
@@ -755,6 +770,7 @@ func (i HeresphereResource) getHeresphereScene(req *restful.Request, resp *restf
 		Tags:                 tags,
 		Media:                media,
 		AlphaPackedSettings:  alphaPackedSettings,
+		AlphaExternal:        alphaExternal,
 		WriteFavorite:        config.Config.Interfaces.Heresphere.AllowFavoriteUpdates,
 		WriteRating:          config.Config.Interfaces.Heresphere.AllowRatingUpdates,
 		WriteTags:            config.Config.Interfaces.Heresphere.AllowTagUpdates || config.Config.Interfaces.Heresphere.AllowCuepointUpdates || config.Config.Interfaces.Heresphere.AllowWatchlistUpdates || config.Config.Web.SceneTrailerlist,
