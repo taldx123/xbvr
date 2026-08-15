@@ -46,6 +46,6 @@ jobs:
           else
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
-            git tag nightly
+            git tag v0.0.0-nightly
             make release
           fi

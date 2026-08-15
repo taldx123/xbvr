@@ -241,4 +241,4 @@ changelog:
     - "^test:"
 
 release:
-  disable: '{{ if eq .Tag "nightly" }}true{{ else }}false{{ end }}'
+  disable: '{{ if eq .Tag "v0.0.0-nightly" }}true{{ else }}false{{ end }}'
