@@ -106,7 +106,7 @@ func (i FilesResource) toggleAlpha(req *restful.Request, resp *restful.Response)
 	if err == nil {
 		file.IsExternalAlpha = !file.IsExternalAlpha
 		file.Save()
-		
+
 		if file.IsExternalAlpha && file.SceneID != 0 {
 			var scene models.Scene
 			if db.Preload("Files").First(&scene, file.SceneID).Error == nil {

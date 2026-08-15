@@ -96,7 +96,7 @@ func RescanVolumes(id int) {
 			filename3 := strings.Replace(filename, ".hsp", ".mp4", -1)
 			filename4 := strings.Replace(filename, ".srt", ".mp4", -1)
 			filename5 := strings.Replace(filename, ".cmscript", ".mp4", -1)
-			
+
 			stepStart := time.Now()
 			for _, s := range allScenes {
 				if strings.Contains(strings.ToLower(s.FilenamesArr), strings.ToLower(filename)) ||
@@ -113,7 +113,7 @@ func RescanVolumes(id int) {
 
 			if len(scenes) == 0 && config.Config.Advanced.UseAltSrcInFileMatching {
 				stepStart = time.Now()
-				
+
 				var matchedExtRefs []models.ExternalReference
 				for _, ext := range allExtRefs {
 					if strings.Contains(strings.ToLower(ext.ExternalData), strings.ToLower(filename)) ||
@@ -146,7 +146,7 @@ func RescanVolumes(id int) {
 				}
 				timeAltSrcMatch += time.Since(stepStart)
 			}
-			
+
 			if len(scenes) == 1 {
 				files[i].SceneID = scenes[0].ID
 				files[i].Save()
@@ -171,7 +171,7 @@ func RescanVolumes(id int) {
 				if batchEnd > len(unmatchedFiles) {
 					batchEnd = len(unmatchedFiles)
 				}
-				
+
 				var hashes []string
 				var batchFileIndices []int
 				for _, idx := range unmatchedFiles[batchStart:batchEnd] {
@@ -195,7 +195,7 @@ func RescanVolumes(id int) {
 							paddingLength := 16 - len(hash)
 							hash = strings.Repeat("0", paddingLength) + hash
 						}
-						
+
 						if matchID, ok := matchResults[hash]; ok && matchID != "" {
 							var externalRefLink models.ExternalReferenceLink
 							db.Where(&models.ExternalReferenceLink{ExternalSource: "stashdb scene", ExternalId: matchID}).First(&externalRefLink)
@@ -407,7 +407,7 @@ func scanLocalVolume(vol models.Volume, db *gorm.DB, tlog *logrus.Entry) {
 		for _, alphaFile := range alphaFiles {
 			// Find the corresponding parent file
 			parentFilename := strings.Replace(alphaFile.Filename, "_XALPHA", "", 1)
-			
+
 			var parentFile models.File
 			if db.Where(&models.File{Path: alphaFile.Path, Filename: parentFilename}).First(&parentFile).Error == nil {
 				if parentFile.SceneID != 0 {
