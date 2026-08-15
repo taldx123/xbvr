@@ -128,6 +128,7 @@
                       <refresh-button :item="item" v-if="!displayingAlternateSource"/>
                       <rescrape-button :item="item" v-if="!displayingAlternateSource"/>
                       <link-stashdb-button :item="item" objectType="scene" />
+                      <search-btdig-button :item="item" v-if="!displayingAlternateSource"/>
                     </div>
                   </div>
                 </div>
@@ -412,6 +413,7 @@ import GlobalEvents from 'vue-global-events'
 import StarRating from 'vue-star-rating'
 import FavouriteButton from '../../components/FavouriteButton'
 import LinkStashdbButton from '../../components/LinkStashdbButton'
+import SearchBtdigButton from '../../components/SearchBtdigButton'
 import WatchlistButton from '../../components/WatchlistButton'
 import WishlistButton from '../../components/WishlistButton'
 import WatchedButton from '../../components/WatchedButton'
@@ -423,7 +425,7 @@ import HiddenButton from '../../components/HiddenButton'
 
 export default {
   name: 'Details',
-  components: { VueLoadImage, GlobalEvents, StarRating, WatchlistButton, FavouriteButton, LinkStashdbButton, WishlistButton, WatchedButton, EditButton, RefreshButton, RescrapeButton, TrailerlistButton, HiddenButton },
+  components: { VueLoadImage, GlobalEvents, StarRating, WatchlistButton, FavouriteButton, LinkStashdbButton, SearchBtdigButton, WishlistButton, WatchedButton, EditButton, RefreshButton, RescrapeButton, TrailerlistButton, HiddenButton },
   data () {
     return {
       index: 1,

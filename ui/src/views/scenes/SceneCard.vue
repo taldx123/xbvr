@@ -61,6 +61,7 @@
       <watched-button :item="item" v-if="this.$store.state.optionsWeb.web.sceneWatched"/>
       <edit-button :item="item" v-if="this.$store.state.optionsWeb.web.sceneEdit" />
       <link-stashdb-button :item="item" v-if="!this.stashLinkExists" objectType="scene"/>
+      <search-btdig-button :item="item" />
 
       <span class="is-pulled-right" style="font-size:11px;text-align:right;">
         <a v-if="item.members_url != ''" :href="item.members_url" target="_blank" title="Members Link" rel="noreferrer"><b-icon pack="mdi" icon="link-lock" custom-size="mdi-18px" style="height:0.7rem"/></a>
@@ -93,6 +94,7 @@ import WishlistButton from '../../components/WishlistButton'
 import WatchedButton from '../../components/WatchedButton'
 import EditButton from '../../components/EditButton'
 import LinkStashdbButton from '../../components/LinkStashdbButton'
+import SearchBtdigButton from '../../components/SearchBtdigButton'
 import TrailerlistButton from '../../components/TrailerlistButton'
 import HiddenButton from '../../components/HiddenButton'
 import ky from 'ky'
@@ -101,7 +103,7 @@ import VueLoadImage from 'vue-load-image'
 export default {
   name: 'SceneCard',
   props: { item: Object, reRead: Boolean },
-  components: { WatchlistButton, FavouriteButton, WishlistButton, WatchedButton, EditButton, LinkStashdbButton, TrailerlistButton, HiddenButton, VueLoadImage },
+  components: { WatchlistButton, FavouriteButton, WishlistButton, WatchedButton, EditButton, LinkStashdbButton, SearchBtdigButton, TrailerlistButton, HiddenButton, VueLoadImage },
   data () {
     return {
       preview: false,

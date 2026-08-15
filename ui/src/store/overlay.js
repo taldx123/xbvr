@@ -44,6 +44,10 @@ const state = {
     show: false,
     scene: null
   },
+  searchBtdigScenes: {
+    show: false,
+    scene: null
+  },
   searchStashDbActors: {
     show: false,
     actor: null
@@ -151,6 +155,14 @@ const mutations = {
   hideSearchStashdbScenes (state) {
     state.searchStashDbScenes.scene = null
     state.searchStashDbScenes.show = false
+  },
+  showSearchBtdigScenes (state, payload) {
+    state.searchBtdigScenes.scene = payload ? payload.item : null
+    state.searchBtdigScenes.show = true
+  },
+  hideSearchBtdigScenes (state) {
+    state.searchBtdigScenes.scene = null
+    state.searchBtdigScenes.show = false
   },
   showSearchStashdbActors (state, payload) {
     state.searchStashDbActors.actor = payload.item
