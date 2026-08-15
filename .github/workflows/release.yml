@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - "*"
+  workflow_dispatch:
 
 jobs:
 
@@ -39,4 +40,9 @@ jobs:
           echo '${{github.actor}}:${{secrets.GITHUB_TOKEN}}:ghcr.io' >> .docker-creds
 
       - name: Release publish
-        run: make release
+        run: |
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            make release
+          else
+            make release-snapshot
+          fi
