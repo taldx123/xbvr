@@ -164,6 +164,11 @@ docker_manifests:
       - ghcr.io/{{.Env.GITHUB_USER}}/{{.Env.GITHUB_PROJECT}}:{{ .Version }}-amd64
       - ghcr.io/{{.Env.GITHUB_USER}}/{{.Env.GITHUB_PROJECT}}:{{ .Version }}-arm64
       - ghcr.io/{{.Env.GITHUB_USER}}/{{.Env.GITHUB_PROJECT}}:{{ .Version }}-armv7
+  - name_template: ghcr.io/{{.Env.GITHUB_USER}}/{{.Env.GITHUB_PROJECT}}:master
+    image_templates:
+      - ghcr.io/{{.Env.GITHUB_USER}}/{{.Env.GITHUB_PROJECT}}:{{ .Version }}-amd64
+      - ghcr.io/{{.Env.GITHUB_USER}}/{{.Env.GITHUB_PROJECT}}:{{ .Version }}-arm64
+      - ghcr.io/{{.Env.GITHUB_USER}}/{{.Env.GITHUB_PROJECT}}:{{ .Version }}-armv7
 
 archives:
 - id: archive-linux
@@ -236,4 +241,4 @@ changelog:
     - "^test:"
 
 release:
-  disable: false
+  disable: '{{ if eq .Tag "nightly" }}true{{ else }}false{{ end }}'
