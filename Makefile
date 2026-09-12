@@ -1,4 +1,4 @@
-GORELEASER_CROSS_VERSION  ?= v1.24.5
+GORELEASER_CROSS_VERSION  ?= v1.27.1-1
 
 SYSROOT_DIR     ?= sysroots
 SYSROOT_ARCHIVE ?= sysroots.tar.bz2
@@ -22,7 +22,7 @@ release-dry-run-snapshot:
 		-v `pwd`/sysroot:/sysroot \
 		-w /go/src \
 		ghcr.io/goreleaser/goreleaser-cross:${GORELEASER_CROSS_VERSION} \
-		--clean --skip-validate --skip-publish --snapshot
+		release --clean --snapshot
 
 .PHONY: release-dry-run
 release-dry-run:
@@ -35,7 +35,7 @@ release-dry-run:
 		-v `pwd`/sysroot:/sysroot \
 		-w /go/src \
 		ghcr.io/goreleaser/goreleaser-cross:${GORELEASER_CROSS_VERSION} \
-		--clean --skip-validate --skip-publish
+		release --clean --skip=validate,publish
 
 .PHONY: release-snapshot
 release-snapshot:
