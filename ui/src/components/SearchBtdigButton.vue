@@ -23,7 +23,7 @@ export default {
       if (this.item.site) {
         query = `${this.item.site} ${this.item.title}`
       }
-      return `https://pt.btdig.com/search?order=0&q=${encodeURIComponent(query)}`
+      return `https://pt.btdig.com/search?q=${encodeURIComponent(query).replace(/%20/g, '+')}`
     }
   },
   methods: {

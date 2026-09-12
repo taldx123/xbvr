@@ -40,7 +40,7 @@ export default {
       if (this.scene.site) {
         query = `${this.scene.site} ${this.scene.title}`
       }
-      return `https://pt.btdig.com/search?order=0&q=${encodeURIComponent(query)}`
+      return `https://pt.btdig.com/search?q=${encodeURIComponent(query).replace(/%20/g, '+')}`
     }
   },
   methods: {
