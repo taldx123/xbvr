@@ -327,8 +327,11 @@ func (i HeresphereResource) getHeresphereScene(req *restful.Request, resp *restf
 	}
 
 	alphaExternal := ""
-	if len(videoFiles) > 0 && videoFiles[0].ExternalAlphaID != 0 {
-		alphaExternal = fmt.Sprintf("%v://%v/api/dms/file/%v%v", getProto(req), req.Request.Host, videoFiles[0].ExternalAlphaID, dnt)
+	for _, vf := range videoFiles {
+		if vf.ExternalAlphaID != 0 {
+			alphaExternal = fmt.Sprintf("%v://%v/api/dms/file/%v%v", getProto(req), req.Request.Host, vf.ExternalAlphaID, dnt)
+			break
+		}
 	}
 
 	features := make(map[string]bool, 30)
