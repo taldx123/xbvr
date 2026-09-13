@@ -894,6 +894,8 @@ func queryScenes(db *gorm.DB, r RequestSceneList) (*gorm.DB, *gorm.DB) {
 			where = "(chroma_key <> '' or exists (select 1 from files where files.scene_id = scenes.id and files.`type` = 'video' and files.has_alpha = true))"
 		case "Is Alpha Passthrough":
 			where = `((chroma_key <> '' and chroma_key like '%"hasAlpha":true%') or ` + "exists (select 1 from files where files.scene_id = scenes.id and files.`type` = 'video' and files.has_alpha = true))"
+		case "Has External Alpha":
+			where = "exists (select 1 from files where files.scene_id = scenes.id and files.`type` = 'video' and files.external_alpha_id > 0)"
 		case "In Wishlist":
 			where = "wishlist = 1"
 		case "Stashdb Linked":
