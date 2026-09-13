@@ -397,8 +397,6 @@ func SexLikeReal(wg *models.ScrapeWG, updateSite bool, knownScenes []string, out
 				// Check for alpha channel
 				if sceneData.Get("passthrough.alpha.enabled").Bool() {
 					alphA = "true"
-				} else if sceneData.Get("passthrough.aiAlpha.enabled").Bool() {
-					alphA = "true"
 				}
 
 				if alphA == "true" {
