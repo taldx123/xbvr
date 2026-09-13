@@ -83,6 +83,14 @@ func VRBangersSite(wg *models.ScrapeWG, updateSite bool, knownScenes []string, o
 			sc.Duration = int(apiDuration / 60)
 		}
 
+		if gjson.Get(JsonMetadata, "data.item.videoSettings.transparency.mode").Int() > 0 {
+			ckData := make(map[string]interface{})
+			ckData["enabled"] = true
+			ckData["hasAlpha"] = true
+			chromaKeyJSON, _ := json.Marshal(ckData)
+			sc.ChromaKey = string(chromaKeyJSON)
+		}
+
 		// Cover URLs
 		e.ForEach(`meta[property="og:image"]`, func(id int, e *colly.HTMLElement) {
 			tmpCover := strings.Split(e.Request.AbsoluteURL(e.Attr("content")), "?")[0]
