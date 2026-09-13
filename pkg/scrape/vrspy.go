@@ -209,7 +209,18 @@ func VRSpy(wg *models.ScrapeWG, updateSite bool, knownScenes []string, out chan<
 		// Look for gallery images in page HTML
 		pageHTMLStr := string(e.Response.Body)
 
-		if strings.Contains(strings.ToLower(pageHTMLStr), "_passthrough") || strings.Contains(strings.ToLower(sc.Title), "pass-through") {
+		hasPassthrough := false
+		if strings.Contains(strings.ToLower(sc.Title), "pass-through") || strings.Contains(strings.ToLower(sc.Title), "passthrough") {
+			hasPassthrough = true
+		}
+		for _, tag := range sc.Tags {
+			if strings.Contains(strings.ToLower(tag), "passthrough") {
+				hasPassthrough = true
+				break
+			}
+		}
+
+		if hasPassthrough {
 			ckData := make(map[string]interface{})
 			ckData["enabled"] = true
 			ckData["hasAlpha"] = true
