@@ -400,6 +400,22 @@ func SexLikeReal(wg *models.ScrapeWG, updateSite bool, knownScenes []string, out
 				} else if sceneData.Get("passthrough.aiAlpha.enabled").Bool() {
 					alphA = "true"
 				}
+
+				if alphA == "true" {
+					var ckData map[string]interface{}
+					if sc.ChromaKey != "" {
+						err := json.Unmarshal([]byte(sc.ChromaKey), &ckData)
+						if err != nil || ckData == nil {
+							ckData = make(map[string]interface{})
+						}
+					} else {
+						ckData = make(map[string]interface{})
+					}
+					ckData["enabled"] = true
+					ckData["hasAlpha"] = true
+					chromaKeyJSON, _ := json.Marshal(ckData)
+					sc.ChromaKey = string(chromaKeyJSON)
+				}
 			}
 		}
 
