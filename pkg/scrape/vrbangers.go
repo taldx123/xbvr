@@ -83,7 +83,7 @@ func VRBangersSite(wg *models.ScrapeWG, updateSite bool, knownScenes []string, o
 			sc.Duration = int(apiDuration / 60)
 		}
 
-		if gjson.Get(JsonMetadata, "data.item.videoSettings.transparency.mode").Int() > 0 {
+		if gjson.Get(JsonMetadata, "data.item.videoSettings.transparency.mode").Int() == 1 {
 			ckData := make(map[string]interface{})
 			ckData["enabled"] = true
 			ckData["hasAlpha"] = true
