@@ -398,7 +398,11 @@ func scanLocalVolume(vol models.Volume, db *gorm.DB, tlog *logrus.Entry) {
 				tlog.Errorf("New file %s, but got error %s", path, err)
 			}
 
-			tlog.Infof("Scanning %v (%v/%v)", vol.Path, j+1, len(videoProcList))
+			if common.EnvConfig.Debug || common.Log.GetLevel() >= logrus.DebugLevel {
+				tlog.Infof("Scanning %v (%v/%v) %v", vol.Path, j+1, len(videoProcList), path)
+			} else {
+				tlog.Infof("Scanning %v (%v/%v)", vol.Path, j+1, len(videoProcList))
+			}
 		}
 
 		// Auto-match external alpha files that are currently unmatched
