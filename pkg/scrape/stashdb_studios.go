@@ -113,13 +113,14 @@ func init() {
 	}
 }
 func addStashScraper(id string, name string, avatarURL string, stashGuid string, masterSiteId string) {
+	scraperID := id + "-stashdb"
 	if masterSiteId == "" {
-		registerScraper(id+"-stashdb", name+" (Stashdb)", avatarURL, "stashdb.org", func(wg *models.ScrapeWG, updateSite bool, knownScenes []string, out chan<- models.ScrapedScene, singleSceneURL string, singeScrapeAdditionalInfo string, limitScraping bool) error {
-			return StashStudio(wg, updateSite, knownScenes, out, singleSceneURL, singeScrapeAdditionalInfo, id, name, limitScraping, stashGuid, masterSiteId)
+		registerScraper(scraperID, name+" (Stashdb)", avatarURL, "stashdb.org", func(wg *models.ScrapeWG, updateSite bool, knownScenes []string, out chan<- models.ScrapedScene, singleSceneURL string, singeScrapeAdditionalInfo string, limitScraping bool) error {
+			return StashStudio(wg, updateSite, knownScenes, out, singleSceneURL, singeScrapeAdditionalInfo, scraperID, name, limitScraping, stashGuid, masterSiteId)
 		})
 	} else {
-		registerAlternateScraper(id+"-stashdb", name+" (Stashdb)", avatarURL, "stashdb.org", masterSiteId, func(wg *models.ScrapeWG, updateSite bool, knownScenes []string, out chan<- models.ScrapedScene, singleSceneURL string, singeScrapeAdditionalInfo string, limitScraping bool) error {
-			return StashStudio(wg, updateSite, knownScenes, out, singleSceneURL, singeScrapeAdditionalInfo, id, name, limitScraping, stashGuid, masterSiteId)
+		registerAlternateScraper(scraperID, name+" (Stashdb)", avatarURL, "stashdb.org", masterSiteId, func(wg *models.ScrapeWG, updateSite bool, knownScenes []string, out chan<- models.ScrapedScene, singleSceneURL string, singeScrapeAdditionalInfo string, limitScraping bool) error {
+			return StashStudio(wg, updateSite, knownScenes, out, singleSceneURL, singeScrapeAdditionalInfo, scraperID, name, limitScraping, stashGuid, masterSiteId)
 		})
 	}
 }
