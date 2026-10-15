@@ -226,7 +226,7 @@ func (i HeresphereResource) getHeresphereFile(req *restful.Request, resp *restfu
 	resolution := strconv.Itoa(file.VideoHeight)
 	height := file.VideoHeight
 	width := file.VideoWidth
-	if file.VideoProjection == "360_tb" {
+	if file.VideoProjection == "360_tb" || file.VideoProjection == "180_tb" {
 		resolution = strconv.Itoa(file.VideoHeight / 2)
 	}
 
@@ -351,7 +351,7 @@ func (i HeresphereResource) getHeresphereScene(req *restful.Request, resp *restf
 		resolution := strconv.Itoa(file.VideoHeight)
 		vertresolution := file.VideoWidth
 
-		if file.VideoProjection == "360_tb" {
+		if file.VideoProjection == "360_tb" || file.VideoProjection == "180_tb" {
 			resolution = strconv.Itoa(file.VideoHeight / 2)
 			vertresolution = vertresolution * 2
 		}
@@ -678,6 +678,11 @@ func (i HeresphereResource) getHeresphereScene(req *restful.Request, resp *restf
 	case "360_tb":
 		addFeatureTag("FOV: 360°")
 		projection = "equirectangular360"
+		stereo = "tb"
+
+	case "180_tb":
+		addFeatureTag("FOV: 180°")
+		projection = "equirectangular"
 		stereo = "tb"
 
 	case "mkx200":

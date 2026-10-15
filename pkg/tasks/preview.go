@@ -79,6 +79,9 @@ func RenderPreview(inputFile string, destFile string, videoProjection string, st
 	if vs.Height == vs.Width {
 		crop = "iw/2:ih/2:iw/4:ih/2" // TB videos
 	}
+	if videoProjection == "180_tb" {
+		crop = "iw:ih/2:0:0" // TB 180 videos
+	}
 	if videoProjection == "flat" {
 		crop = "iw:ih:iw:ih" // LR videos
 	}

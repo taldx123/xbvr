@@ -485,6 +485,11 @@ func (i DeoVRResource) getDeoScene(req *restful.Request, resp *restful.Response)
 			screenType = "sphere"
 		}
 
+		if videoFiles[0].VideoProjection == "180_tb" {
+			stereoMode = "tb"
+			screenType = "dome"
+		}
+
 		if videoFiles[0].VideoProjection == "flat" {
 			stereoMode = "off"
 			screenType = "flat"

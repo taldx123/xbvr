@@ -853,7 +853,7 @@ func queryScenes(db *gorm.DB, r RequestSceneList) (*gorm.DB, *gorm.DB) {
 		case "Flat video":
 			where = "exists (select 1 from files where files.scene_id = scenes.id and files.`type` = 'video' and files.video_projection = 'flat')"
 		case "FOV: 180°":
-			where = "exists (select 1 from files where files.scene_id = scenes.id and files.`type` = 'video' and files.video_projection in ('180_mono','180_sbs','fisheye'))"
+			where = "exists (select 1 from files where files.scene_id = scenes.id and files.`type` = 'video' and files.video_projection in ('180_mono','180_sbs','180_tb','fisheye'))"
 		case "FOV: 190°":
 			where = "exists (select 1 from files where files.scene_id = scenes.id and files.`type` = 'video' and files.video_projection in ('rf52','fisheye190'))"
 		case "FOV: 200°":
@@ -865,7 +865,7 @@ func queryScenes(db *gorm.DB, r RequestSceneList) (*gorm.DB, *gorm.DB) {
 		case "Projection Perspective":
 			where = "exists (select 1 from files where files.scene_id = scenes.id and files.`type` = 'video' and files.video_projection = 'flat')"
 		case "Projection Equirectangular":
-			where = "exists (select 1 from files where files.scene_id = scenes.id and files.`type` = 'video' and files.video_projection in ('180_mono','180_sbs'))"
+			where = "exists (select 1 from files where files.scene_id = scenes.id and files.`type` = 'video' and files.video_projection in ('180_mono','180_sbs','180_tb'))"
 		case "Projection Equirectangular360":
 			where = "exists (select 1 from files where files.scene_id = scenes.id and files.`type` = 'video' and files.video_projection in ('360_tb','360_mono'))"
 		case "Projection Fisheye":
@@ -875,7 +875,7 @@ func queryScenes(db *gorm.DB, r RequestSceneList) (*gorm.DB, *gorm.DB) {
 		case "Top/Bottom":
 			where = "exists (select 1 from files where files.scene_id = scenes.id and files.`type` = 'video' and files.video_projection in ('180_tb','360_tb'))"
 		case "Side by Side":
-			where = "exists (select 1 from files where files.scene_id = scenes.id and files.`type` = 'video' and files.video_projection not in (flat','180_mono','360_mono', '180_tb', '360_tb'))"
+			where = "exists (select 1 from files where files.scene_id = scenes.id and files.`type` = 'video' and files.video_projection not in ('flat','180_mono','360_mono', '180_tb', '360_tb'))"
 		case "MKX200":
 			where = "exists (select 1 from files where files.scene_id = scenes.id and files.`type` = 'video' and files.video_projection = 'mkx200')"
 		case "MKX220":

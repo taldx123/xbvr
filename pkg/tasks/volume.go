@@ -389,6 +389,17 @@ func scanLocalVolume(vol models.Volume, db *gorm.DB, tlog *logrus.Entry) {
 						fl.VideoProjection = "360_tb"
 					}
 
+					if vs.Width*2 == vs.Height || vs.Height > vs.Width {
+						fl.VideoProjection = "180_tb"
+						nameparts := filenameSeparator.Split(strings.ToLower(filepath.Base(path)), -1)
+						for _, part := range nameparts {
+							if part == "flat" {
+								fl.VideoProjection = "flat"
+								break
+							}
+						}
+					}
+
 					fl.CalculateFramerate()
 				}
 			}

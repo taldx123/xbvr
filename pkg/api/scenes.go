@@ -410,15 +410,15 @@ func (i SceneResource) getFilters(req *restful.Request, resp *restful.Response) 
 	// resolutions
 	switch db.Dialect().GetName() {
 	case "mysql":
-		db.Table("files").Select("distinct case when  video_projection = '360_tb' then (video_width+499)*2 div 1000 else (video_width+499) div 1000 end as result").
+		db.Table("files").Select("distinct case when  video_projection in ('180_tb', '360_tb') then (video_width+499)*2 div 1000 else (video_width+499) div 1000 end as result").
 			Where("`type`='video'").
-			Order("case when  video_projection = '360_tb' then (video_width+499)*2 div 1000 else (video_width+499) div 1000 end").
+			Order("case when  video_projection in ('180_tb', '360_tb') then (video_width+499)*2 div 1000 else (video_width+499) div 1000 end").
 			Find(&results)
 
 	case "sqlite3":
-		db.Table("files").Select("distinct case when video_projection = '360_tb' then (video_width+499)*2 / 1000 else (video_width+499) / 1000 end as result").
+		db.Table("files").Select("distinct case when video_projection in ('180_tb', '360_tb') then (video_width+499)*2 / 1000 else (video_width+499) / 1000 end as result").
 			Where("`type`='video'").
-			Order("case when video_projection = '360_tb' then (video_width+499)*2 / 1000 else (video_width+499) / 1000 end").
+			Order("case when video_projection in ('180_tb', '360_tb') then (video_width+499)*2 / 1000 else (video_width+499) / 1000 end").
 			Find(&results)
 	}
 
