@@ -275,6 +275,9 @@ func searchViaJackett(jackettURL, apiKey, query string) ([]PornolabResult, error
 	}
 
 	sort.Slice(results, func(a, b int) bool {
+		if results[a].Date != results[b].Date {
+			return results[a].Date > results[b].Date
+		}
 		return results[a].Seeders > results[b].Seeders
 	})
 

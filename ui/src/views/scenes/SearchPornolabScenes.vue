@@ -41,7 +41,7 @@
                  :loading="isFetching"
                  striped
                  hoverable
-                 default-sort="seeders"
+                 default-sort="date"
                  default-sort-direction="desc">
           <b-table-column field="category" label="Category" sortable v-slot="props" width="110">
             <small>{{ props.row.category }}</small>
