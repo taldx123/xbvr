@@ -71,8 +71,8 @@
 
           <b-table-column field="magnet" label="Magnet" v-slot="props" width="290">
             <div v-if="props.row.magnet" class="torrent_magnet" style="display:table-cell">
-              <div class="fa fa-magnet" style="color:#cc0000">
-                <a style="padding-inline-start:0.3em"
+              <div class="torrent_magnet_inner" style="color:#cc0000">
+                <svg aria-hidden="true" focusable="false" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="width: 1em; height: 1em; vertical-align: -0.125em; fill: currentColor;"><path d="M368 32h-64c-17.67 0-32 14.33-32 32v32h128V64c0-17.67-14.33-32-32-32zm-224 0H80C62.33 32 48 46.33 48 64v32h128V64c0-17.67-14.33-32-32-32zm128 96v128c0 35.35-28.65 64-64 64s-64-28.65-64-64V128H16v128c0 106.04 85.96 192 192 192s192-85.96 192-192V128H272z"/></svg><a style="padding-inline-start:0.3em"
                    :href="props.row.magnet"
                    title="Baixar via link magnético">{{ formatShortMagnet(props.row.magnet) }}</a><button
                    v-if="showFallbackDmm"
@@ -124,7 +124,7 @@ export default {
       isModalActive: true,
       isFetching: false,
       loadingMagnetId: null,
-      showFallbackDmm: false,
+      showFallbackDmm: true,
       unmounted: false,
       queryString: '',
       statusMessage: '',
@@ -157,7 +157,6 @@ export default {
       const q = (this.queryString || '').trim()
       if (!q) return
       this.isFetching = true
-      this.showFallbackDmm = false
       this.statusMessage = ''
       ky.get('/api/pornolab/search?q=' + encodeURIComponent(q), { timeout: 60000 })
         .json()
@@ -180,10 +179,8 @@ export default {
       this.$nextTick(() => {
         setTimeout(() => {
           if (this.unmounted || !this.$el) return
-          const extBtn = this.$el.querySelector('.torrent_magnet .fa-magnet button:not(.xbvr-dmm-fallback)')
-          if (!extBtn) {
-            this.showFallbackDmm = true
-          }
+          const extBtn = this.$el.querySelector('.torrent_magnet button:not(.xbvr-dmm-fallback)')
+          this.showFallbackDmm = !extBtn
         }, 250)
       })
     },
@@ -255,7 +252,7 @@ export default {
 .no-wrap {
   white-space: nowrap;
 }
-.fa-magnet:has(button + button) .xbvr-dmm-fallback {
+.torrent_magnet_inner:has(button + button) .xbvr-dmm-fallback {
   display: none !important;
 }
 </style>
