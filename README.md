@@ -184,3 +184,12 @@ esc - closes details pane
 | | UI_PASSWORD | String | set the password for UI authentications
 | | JACKETT_URL | String | Jackett base URL for PornoLab tracker search (default `http://jackett:9117`) |
 | | JACKETT_API_KEY | String | Jackett API key used by `/api/pornolab` tracker search |
+
+#### Tracker Search (BTDIG & PornoLab via Jackett)
+* Scene cards and the scene details modal provide two tracker search buttons:
+  * **Magnet icon (`Search BTDIG`):** Searches `btdig.com` in an embedded modal.
+  * **Flask icon (`Search PornoLab`):** Queries a Jackett instance (`/api/v2.0/indexers/pornolab/results`) configured via `JACKETT_URL` and `JACKETT_API_KEY`.
+* To configure PornoLab search:
+  1. Add and authenticate the `pornolab` indexer inside your Jackett Web UI (`http://localhost:9117`).
+  2. Set `JACKETT_API_KEY` (and optionally `JACKETT_URL`, defaulting to `http://jackett:9117`) in the XBVR environment.
+  3. In the XBVR search modal, click **Magnet** on any result row to parse the `.torrent` via Jackett into a native `magnet:?xt=urn:btih:...` link and **`DMM🧲`** (`debridmediamanager.com`) button. Resolved magnets are cached on disk in `<AppDir>/pornolab_magnets.json`.
