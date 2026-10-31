@@ -165,10 +165,6 @@ export default {
           this.statusMessage = data.status || ''
           this.isFetching = false
           this.checkDmmExtensionInjection()
-          // Auto-resolve magnet only when there is a single matching result
-          if (this.searchResults.length === 1 && !this.searchResults[0].magnet) {
-            this.resolveRowMagnet(this.searchResults[0], true)
-          }
         })
         .catch(err => {
           this.statusMessage = err.message || 'Search request failed'
