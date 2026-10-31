@@ -6,7 +6,7 @@
             @click.left.prevent="openDialog(item)"
             title="Search BTDIG">
             <span class="icon">
-              <b-icon pack="mdi" icon="magnify" size="is-small" />
+              <b-icon pack="mdi" icon="magnet" size="is-small" />
            </span>
         </a>
     </span>

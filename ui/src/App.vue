@@ -15,6 +15,7 @@
     <EditActor v-if="showActorEdit" />
     <SearchStashdbScenes v-if="showSearchStashdbScenes" />
     <SearchBtdigScenes v-if="showSearchBtdigScenes" />
+    <SearchPornolabScenes v-if="showSearchPornolabScenes" />
     <SearchStashdbActors v-if="showSearchStashdbActors" />
 
     <QuickFind/>
@@ -36,11 +37,12 @@ import ActorDetails from './views/actors/ActorDetails'
 import EditActor from './views/actors/EditActor'
 import SearchStashdbScenes from './views/scenes/SearchStashdbScenes'
 import SearchBtdigScenes from './views/scenes/SearchBtdigScenes'
+import SearchPornolabScenes from './views/scenes/SearchPornolabScenes'
 import SearchStashdbActors from './views/actors/SearchStashdbActors'
 import MigrationOverlay from './components/MigrationOverlay'
 
 export default {
-  components: { Navbar, Socket, QuickFind, GlobalEvents, Details, EditScene, ActorDetails, EditActor, SearchStashdbScenes, SearchBtdigScenes, SearchStashdbActors, MigrationOverlay },
+  components: { Navbar, Socket, QuickFind, GlobalEvents, Details, EditScene, ActorDetails, EditActor, SearchStashdbScenes, SearchBtdigScenes, SearchPornolabScenes, SearchStashdbActors, MigrationOverlay },
   computed: {
     showOverlay () {
       return this.$store.state.overlay.details.show
@@ -59,6 +61,9 @@ export default {
     },
     showSearchBtdigScenes() {
       return this.$store.state.overlay.searchBtdigScenes.show
+    },
+    showSearchPornolabScenes() {
+      return this.$store.state.overlay.searchPornolabScenes.show
     },
     showSearchStashdbActors() {
       return this.$store.state.overlay.searchStashDbActors.show

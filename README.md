@@ -182,3 +182,5 @@ esc - closes details pane
 |	`--concurrent_scrapers` | CONCURRENT_SCRAPERS | Int | set the number of scrapers that run concurrently default 9999|
 | | UI_USERNAME | String | set the username for UI authentication
 | | UI_PASSWORD | String | set the password for UI authentications
+| | JACKETT_URL | String | Jackett base URL for PornoLab tracker search (default `http://jackett:9117`) |
+| | JACKETT_API_KEY | String | Jackett API key used by `/api/pornolab` tracker search |

@@ -99,6 +99,7 @@ _This file contains critical rules and patterns that AI agents must follow when 
 **Security & Edge Cases:**
 - Never expose sensitive environment variables or server paths directly in the frontend Vue templates or Vuex stores.
 - Given the presence of media processing dependencies (`ffprobe`, `go-whisper`, `imaging`), ensure that any heavy media tasks are handled asynchronously in the Go backend (e.g., via goroutines) without blocking the main HTTP handlers.
+- Tracker search (`pkg/api/pornolab.go`, `SearchPornolabScenes.vue`) queries Jackett via `JACKETT_URL` and `JACKETT_API_KEY`, generates magnet links on demand from `.torrent` info dictionaries (persisted in `pornolab_magnets.json` under `common.AppDir`), and renders native `<a href="magnet:...">` elements with `DMM🧲` (`debridmediamanager.com`) integration.
 
 ---
 
@@ -116,4 +117,4 @@ _This file contains critical rules and patterns that AI agents must follow when 
 - Review quarterly for outdated rules
 - Remove rules that become obvious over time
 
-Last Updated: 2026-07-25
+Last Updated: 2026-10-31
